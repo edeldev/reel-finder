@@ -82,7 +82,7 @@ Sube el repositorio sin `.env` (ya está ignorado). `TAVILY_API_KEY` nunca se es
 4. Despliega o vuelve a desplegar después de cambiar la variable.
 5. Comprueba `/api/health`: debe devolver `{"configured":true}`. Después busca desde la aplicación.
 
-`api/search.ts` y `api/health.ts` exportan handlers Web Standard para el runtime Node de [Vercel Functions](https://vercel.com/docs/functions/runtimes/node-js). La función de búsqueda dispone de un máximo configurado de 30s y las llamadas Tavily tienen timeout de 18s. El servidor local vive en `backend/local_server.ts` para evitar confundirlo con un servidor raíz autodetectado.
+`api/search.ts` y `api/health.ts` exportan funciones Node `(req, res)` que adaptan los handlers Web Standard compartidos para el runtime Node de [Vercel Functions](https://vercel.com/docs/functions/runtimes/node-js). La función de búsqueda dispone de un máximo configurado de 30s y las llamadas Tavily tienen timeout de 18s. El servidor local vive en `backend/local_server.ts` para evitar confundirlo con un servidor raíz autodetectado.
 
 ### Netlify
 
@@ -95,3 +95,5 @@ Sube el repositorio sin `.env` (ya está ignorado). `TAVILY_API_KEY` nunca se es
 Las rutas `/api/search` y `/api/health` se reescriben a las funciones antes de la regla de SPA. Los handlers usan la [API moderna de Netlify Functions](https://docs.netlify.com/build/functions/get-started/), y la clave se lee en runtime según la [documentación de variables de entorno](https://docs.netlify.com/build/functions/environment-variables/).
 
 En ambas plataformas, el límite de 12 búsquedas/minuto es una protección básica por instancia caliente, no un límite global entre instancias. Si publicas el servicio, configura también las reglas de protección y consumo de tu plataforma/Tavily según tu uso. Los datos de localStorage pertenecen a cada dominio: los guardados locales no aparecen automáticamente en Netlify, Vercel ni en otro dispositivo.
+
+Los imports del backend incluyen `.js` para que los archivos TypeScript emitidos funcionen como ESM nativo en Vercel; la verificación incluye cargar esos archivos con Node sin bundling ni tsx.

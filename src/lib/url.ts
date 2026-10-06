@@ -1,4 +1,4 @@
-import type { Platform } from '../types/video';
+import type { Platform } from '../types/video.js';
 export function normalize_video_url(value: string): string {
   const url = new URL(value);
   if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) throw new Error('URL inválida');

@@ -1,4 +1,4 @@
-import {sceneProfiles} from './content_references';
+import {sceneProfiles} from './content_references.js';
 export const quickTerms = ['Karma', 'Infidelidad', 'Humillación', 'Paz mental', 'Relaciones', 'Justicia', 'Respeto', 'Actos de bondad', 'Trabajadora humillada', 'Gestos de pareja', 'Límites personales'];
 export const searchTerms: Record<string, string[]> = {
  karma: ['karma instantáneo', 'instant karma', 'gets what he deserved', 'rude person gets karma', 'instant justice'],

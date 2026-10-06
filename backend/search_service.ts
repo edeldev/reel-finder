@@ -1,8 +1,8 @@
-import { platforms, type Platform, type VideoResult } from '../src/types/video';
-import { build_reaction_queries, fold } from '../src/data/search_terms';
-import { reference_queries } from '../src/data/content_references';
-import { reaction_match } from '../src/lib/reaction_match';
-import { normalize_video_url, video_platform } from '../src/lib/url';
+import { platforms, type Platform, type VideoResult } from '../src/types/video.js';
+import { build_reaction_queries, fold } from '../src/data/search_terms.js';
+import { reference_queries } from '../src/data/content_references.js';
+import { reaction_match } from '../src/lib/reaction_match.js';
+import { normalize_video_url, video_platform } from '../src/lib/url.js';
 const labels = {tiktok:'TikTok', instagram:'Instagram', facebook:'Facebook'};
 const domains = {tiktok:'tiktok.com', instagram:'instagram.com', facebook:'facebook.com'};
 const scopes = {tiktok:'site:tiktok.com inurl:video', instagram:'site:instagram.com/reel', facebook:'site:facebook.com/reel'};

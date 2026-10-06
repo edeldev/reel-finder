@@ -1,6 +1,6 @@
-import {build_search_queries, fold} from '../data/search_terms';
-import {sceneProfiles,creatorReferences,footageSources} from '../data/content_references';
-import type {VideoResult} from '../types/video';
+import {build_search_queries, fold} from '../data/search_terms.js';
+import {sceneProfiles,creatorReferences,footageSources} from '../data/content_references.js';
+import type {VideoResult} from '../types/video.js';
 
 // These signals describe indexed text, not a verified analysis of the video.
 const reaction = /\b(videoreacci\w*|video reacci\w*|reaccion\w*|reaction\w*|reacts?\b|reacting\b|dueto\b|duet\b|stitch\b|comenta (este|el) video|analiz\w* (este|el) video)/;

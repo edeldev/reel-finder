@@ -1,5 +1,5 @@
-import {platforms,type Platform} from '../src/types/video';
-import {SearchError,search_videos} from './search_service';
+import {platforms,type Platform} from '../src/types/video.js';
+import {SearchError,search_videos} from './search_service.js';
 
 const buckets=new Map<string,{count:number;until:number}>();
 function rateLimited(ip:string){

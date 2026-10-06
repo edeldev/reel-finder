@@ -3,7 +3,7 @@ import express from 'express';
 import {createServer as createHttpServer} from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import search from './node_search';
+import search from './node_search.js';
 const app = express();
 const httpServer = createHttpServer(app);
 app.disable('x-powered-by');

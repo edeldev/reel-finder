@@ -1,2 +1,3 @@
-import {searchRequest} from '../backend/http';
-export default {fetch:searchRequest};
+import {searchRequest} from '../backend/http.js';
+import {nodeHandler} from '../backend/vercel_handler.js';
+export default nodeHandler(searchRequest);

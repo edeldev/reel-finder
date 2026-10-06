@@ -1,6 +1,6 @@
 import type {Request, Response} from 'express';
-import {platforms,type Platform} from '../src/types/video';
-import {SearchError,search_videos} from './search_service';
+import {platforms,type Platform} from '../src/types/video.js';
+import {SearchError,search_videos} from './search_service.js';
 export default async function search(req: Request, res: Response) {
  if (req.method !== 'POST') return res.status(405).json({error:'Usa POST para buscar.'});
  const {query, platforms:selected, limit=20} = req.body ?? {};

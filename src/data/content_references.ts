@@ -1,4 +1,4 @@
-import type {Platform} from '../types/video';
+import type {Platform} from '../types/video.js';
 
 // User-supplied accounts are search references, not proof of authorship or authenticity.
 export const creatorReferences = [

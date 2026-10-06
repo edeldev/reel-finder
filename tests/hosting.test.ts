@@ -1,3 +1,5 @@
+import {EventEmitter} from 'node:events';
+import type {IncomingMessage,ServerResponse} from 'node:http';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vercelSearch from '../api/search';
@@ -5,11 +7,21 @@ import vercelHealth from '../api/health';
 import netlifySearch from '../netlify/functions/search.mts';
 import netlifyHealth from '../netlify/functions/health.mts';
 
-for(const [name,search,health] of [['Vercel',vercelSearch.fetch,vercelHealth.fetch],['Netlify',netlifySearch,netlifyHealth]] as const){
+function webAdapter(handler:typeof vercelSearch){
+ return async (request:Request)=>{
+  const headers:Record<string,string>={};request.headers.forEach((v,k)=>headers[k]=v);
+  const req=Object.assign(new EventEmitter(),{method:request.method,url:new URL(request.url).pathname,headers,body:request.method==='GET'?undefined:await request.text()});
+  const responseHeaders=new Headers();let result='';
+  const res=Object.assign(new EventEmitter(),{statusCode:200,writableEnded:false,setHeader:(k:string,v:string)=>responseHeaders.set(k,v),end:(body:string)=>{result=body;res.writableEnded=true;}});
+  await handler(req as unknown as IncomingMessage,res as unknown as ServerResponse);
+  return new Response(result,{status:res.statusCode,headers:responseHeaders});
+ };
+}
+for(const [name,search,health] of [['Vercel',webAdapter(vercelSearch),webAdapter(vercelHealth)],['Netlify',netlifySearch,netlifyHealth]] as const){
  test(`${name}: contratos de endpoints y clave faltante`,async()=>{
   const oldKey=process.env.TAVILY_API_KEY;delete process.env.TAVILY_API_KEY;
   try{
-   const state=health(new Request('https://example.com/api/health'));assert.equal(state.status,200);assert.deepEqual(await state.json(),{configured:false});
+   const state=await health(new Request('https://example.com/api/health'));assert.equal(state.status,200);assert.deepEqual(await state.json(),{configured:false});
    assert.equal((await search(new Request('https://example.com/api/search'))).status,405);
    assert.equal((await search(new Request('https://example.com/api/search',{method:'POST',body:'invalid'}))).status,400);
    assert.equal((await search(new Request('https://example.com/api/search',{method:'POST',body:JSON.stringify({query:'karma',platforms:['evil']})}))).status,400);
