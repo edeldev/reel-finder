@@ -1,4 +1,4 @@
-import {sceneProfiles} from './content_references.js';
+import {sceneProfiles,discoveryScenarios} from './content_references.js';
 export const quickTerms = ['Karma', 'Infidelidad', 'Humillación', 'Paz mental', 'Relaciones', 'Justicia', 'Respeto', 'Actos de bondad', 'Trabajadora humillada', 'Gestos de pareja', 'Límites personales'];
 export const searchTerms: Record<string, string[]> = {
  karma: ['karma instantáneo', 'instant karma', 'gets what he deserved', 'rude person gets karma', 'instant justice'],
@@ -13,12 +13,14 @@ export function build_search_queries(query: string): string[] {
 }
 
 // Search for an actual situation as well as a reaction, never requiring a narrator.
-export function build_reaction_queries(query: string): string[] {
+export function build_reaction_queries(query: string, round=0): string[] {
  const terms = build_search_queries(query);
  const topic = query.trim().replace(/["\n\r]/g, ' ');
  const profile=sceneProfiles.find(p=>p.keys.some(key=>fold(topic).includes(key)));
+ const variants=profile?discoveryScenarios[profile.keys[0]]:undefined;
+ const variant=variants?.[round%variants.length];
  return [
-  `${topic} ${profile?.scenario??'escena captada'} video -podcast -tutorial`,
-  `${profile?.english??terms[1]??topic} reaction video -podcast -skit`,
+  `${topic} ${variant?.spanish??profile?.scenario??'escena captada'} video -podcast -tutorial`,
+  `${variant?.english??profile?.english??terms[1]??topic} reaction video -podcast -skit`,
  ];
 }

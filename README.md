@@ -97,3 +97,7 @@ Las rutas `/api/search` y `/api/health` se reescriben a las funciones antes de l
 En ambas plataformas, el límite de 12 búsquedas/minuto es una protección básica por instancia caliente, no un límite global entre instancias. Si publicas el servicio, configura también las reglas de protección y consumo de tu plataforma/Tavily según tu uso. Los datos de localStorage pertenecen a cada dominio: los guardados locales no aparecen automáticamente en Netlify, Vercel ni en otro dispositivo.
 
 Los imports del backend incluyen `.js` para que los archivos TypeScript emitidos funcionen como ESM nativo en Vercel; la verificación incluye cargar esos archivos con Node sin bundling ni tsx.
+
+## Encontrar otros videos del mismo tema
+
+Al repetir una búsqueda, el botón muestra **Buscar otros**. Se rotan escenarios concretos del diccionario y se excluyen URLs ya mostradas para ese tema y plataformas. El navegador recuerda hasta 150 URLs por combinación y 50 combinaciones; el backend recibe hasta 50 URLs recientes dentro del límite de tamaño del request. La aplicación vuelve a filtrar contra todo el registro local. Si no hay candidatos distintos, avisa en lugar de rellenar con los mismos. No garantiza contenido nuevo ilimitado: depende de lo que Tavily haya indexado. El seguimiento comienza con esta versión y es independiente del historial visible.

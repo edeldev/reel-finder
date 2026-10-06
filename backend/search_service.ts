@@ -21,8 +21,8 @@ export function map_result(raw: unknown): VideoResult | null {
  // Search snippets and query-level images cannot verify a video's duration or thumbnail.
  return {id: url, url, platform, title: r.title.slice(0,400), description: typeof r.content === 'string' ? r.content.slice(0,650) : '', thumbnail_url: null, duration_seconds: null, score: typeof r.score === 'number' && Number.isFinite(r.score) ? r.score : null};
 }
-export async function search_videos(query: string, selected: Platform[], limit: number, key: string, signal?: AbortSignal) {
- const variations = build_reaction_queries(query);
+export async function search_videos(query: string, selected: Platform[], limit: number, key: string, signal?: AbortSignal, discovery:{round:number;exclude_urls:string[]}={round:0,exclude_urls:[]}) {
+ const variations = build_reaction_queries(query,discovery.round);
  const searches = selected.flatMap(platform => [...variations,...reference_queries(query,platform)].map(term => ({platform, term})));
  const responses = await Promise.allSettled(searches.map(async ({platform,term}) => {
   const response = await fetch('https://api.tavily.com/search', {method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${key}`}, body:JSON.stringify({query:`${scopes[platform]} ${term}`, search_depth:'basic', topic:'general', max_results:Math.min(20, Math.max(5,Math.ceil(limit/selected.length))), include_domains:[domains[platform]], include_answer:false, include_raw_content:false, include_images:false}), signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(18000)]) : AbortSignal.timeout(18000)});
@@ -36,7 +36,9 @@ export async function search_videos(query: string, selected: Platform[], limit: 
  const warnings: string[] = [];
  selected.forEach(p=> {if (!successful.some(r=>r.value.platform===p)) warnings.push(`No pudimos consultar ${labels[p]}. Los demás resultados están disponibles.`); else if (!successful.some(r=>r.value.platform===p && r.value.results.length)) warnings.push(`No encontramos videos públicos indexados de ${labels[p]} para estas consultas.`);});
  if (responses.some(r=>r.status==='rejected') && !warnings.some(w=>w.startsWith('No pudimos'))) warnings.push('Una búsqueda adicional falló; los resultados pueden ser parciales.');
- const results=rank_video_results([...unique.values()],query).slice(0,limit);
+ const excluded=new Set(discovery.exclude_urls.map(normalize_video_url));
+ const results=rank_video_results([...unique.values()].filter(v=>!excluded.has(v.url)),query).slice(0,limit);
+ if(excluded.size&&!results.length)warnings.push('Estas consultas no encontraron videos diferentes a los que ya revisaste. Prueba una escena más específica o una plataforma distinta.');
  if(results.some(v=>!reaction_match(v,query).matches)) warnings.push('Algunos enlaces tienen descripciones incompletas y su formato está por confirmar. Priorizamos escenas concretas, con o sin videoreacción; revisa el contenido original.');
  return {results, warnings};
 }

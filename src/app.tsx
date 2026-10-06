@@ -9,6 +9,8 @@ import {VideoCard} from './components/video_card';
 import {useSavedVideos} from './hooks/use_saved_videos';
 import {useSearchHistory} from './hooks/use_search_history';
 import {useStorage} from './lib/storage';
+import {discoveryKey,rememberDiscovery,validDiscovery,type DiscoveryState} from './lib/discovery';
+import {normalize_video_url} from './lib/url';
 import {searchVideos} from './lib/api';
 import {platforms,type Platform,type VideoResult,type Settings,type SearchHistory} from './types/video';
 type Page='search'|'saved'|'history'|'settings';
@@ -20,6 +22,7 @@ export default function App(){
  const [page,setPage]=useState<Page>(getPage);const [collapsed,setCollapsed]=useStorage('reel-finder:sidebar',false,(v):v is boolean=>typeof v==='boolean');const [mobileOpen,setMobileOpen]=useState(false);
  const [settings,setSettings]=useStorage<Settings>('reel-finder:settings',defaults,validSettings);const videos=useSavedVideos();const history=useSearchHistory();
  const [query,setQuery]=useState('');const [selected,setSelected]=useState<Platform[]>([...platforms]);const [duration,setDuration]=useState(true);const [results,setResults]=useState<VideoResult[]>([]);const [searched,setSearched]=useState('');const [loading,setLoading]=useState(false);const [error,setError]=useState('');const [warnings,setWarnings]=useState<string[]>([]);const [configured,setConfigured]=useState<boolean|null>(null);
+ const [discovery,setDiscovery]=useStorage<DiscoveryState>('reel-finder:discovery',{},validDiscovery);
  const active=useRef<{controller:AbortController;key:string}|null>(null);
  useEffect(()=>{const onHash=()=>setPage(getPage());window.addEventListener('hashchange',onHash);return()=>window.removeEventListener('hashchange',onHash);},[]);
  useEffect(()=>{const c=new AbortController();fetch('/api/health',{signal:c.signal}).then(r=>r.json()).then(d=>setConfigured(typeof d.configured==='boolean'?d.configured:null)).catch(()=>{});return()=>{c.abort();active.current?.controller.abort();};},[]);
@@ -28,7 +31,8 @@ export default function App(){
  const term=text.trim();const target=options?.platforms??selected;const limit=options?.limit??settings.results_per_search;if(!term||!target.length)return;
  const key=JSON.stringify([term,[...target].sort(),limit]);if(active.current?.key===key)return;
  active.current?.controller.abort();const controller=new AbortController();active.current={controller,key};setQuery(term);setSelected(target);setSearched(term);setLoading(true);setResults([]);setError('');setWarnings([]);navigate('search');
- try{const data=await searchVideos(term,target,limit,controller.signal);if(active.current?.controller!==controller)return;setResults(data.results);setWarnings(data.warnings);setConfigured(true);history.add({query:term,platforms:target,result_count:data.results.length,limit});}
+ const discoveryId=discoveryKey(term,target);const previous=discovery[discoveryId]??{round:0,urls:[]};
+ try{const data=await searchVideos(term,target,limit,controller.signal,{round:previous.round,exclude_urls:previous.urls});if(active.current?.controller!==controller)return;const seen=new Set(previous.urls);const fresh=data.results.filter(v=>!seen.has(normalize_video_url(v.url)));setResults(fresh);setWarnings(data.results.length&&!fresh.length?[...data.warnings,'No encontramos videos nuevos en esta ronda. Prueba una escena más específica.']:data.warnings);setDiscovery(current=>rememberDiscovery(current,discoveryId,fresh.map(v=>v.url)));setConfigured(true);history.add({query:term,platforms:target,result_count:fresh.length,limit});}
  catch(e){if(controller.signal.aborted)return;setError(e instanceof Error?(e.name==='TimeoutError'?'La búsqueda tardó demasiado. Intenta nuevamente.':e.message):'No se pudo conectar con el servidor.');}
  finally{if(active.current?.controller===controller){active.current=null;setLoading(false);}}
  }
