@@ -1,0 +1,35 @@
+{
+  "name": "reel-finder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx backend/local_server.ts",
+    "build": "tsc --noEmit && vite build",
+    "start": "NODE_ENV=production tsx backend/local_server.ts",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "lucide-react": "^0.468.0",
+    "sonner": "^2.0.0",
+    "express": "^5.1.0",
+    "dotenv": "^16.5.0",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.4.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

@@ -1,0 +1,4 @@
+import { useStorage } from '../lib/storage';
+import { platforms, type SearchHistory } from '../types/video';
+const valid=(v:unknown):v is SearchHistory[]=>Array.isArray(v) && v.every(h=>h && typeof h.id==='string' && typeof h.query==='string' && typeof h.searched_at==='string' && typeof h.result_count==='number' && Array.isArray(h.platforms) && h.platforms.length>0 && h.platforms.every((p:typeof platforms[number])=>platforms.includes(p)) && [10,20,30].includes(h.limit));
+export function useSearchHistory(){const [history,setHistory]=useStorage<SearchHistory[]>('reel-finder:history',[],valid);return {history,add:(h:Omit<SearchHistory,'id'|'searched_at'>)=>setHistory(current=>[{...h,id:crypto.randomUUID(),searched_at:new Date().toISOString()},...current].slice(0,50)),clear:()=>setHistory([])};}
